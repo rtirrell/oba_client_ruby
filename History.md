@@ -26,3 +26,11 @@
 ## 1.1.0 / 2010-07-08
 
 * Fully parse MGREP mappings.
+
+## 1.1.1 / 2010-07-08
+
+* Rake or Hoe bug workaround.
+
+## 1.2.0 / 2010-07-08
+
+* Parse statistics.

@@ -5,7 +5,7 @@ require "net/http"
 require "uri"
 
 class OBAClient
-  VERSION = "1.1.0"
+  VERSION = "1.1.1"
 
   # A high HTTP read timeout, as the service sometimes takes awhile to respond.
   DEFAULT_TIMEOUT = 30
@@ -37,6 +37,10 @@ class OBAClient
     :withDefaultStopWords,
     :withSynonyms,
   ]
+  
+  STATISTICS_BEANS_XPATH = "/success/data/annotatorResultBean/statistics/statisticsBean"
+  ANNOTATION_BEANS_XPATH = "/success/data/annotatorResultBean/annotations/annotationBean"
+  ONTOLOGY_BEANS_XPATH =   "/success/data/annotatorResultBean/ontologies/ontologyUsedBean"
 
   # Instantiate the class with a set of reused options. Options used by the
   # method are:
@@ -115,7 +119,11 @@ class OBAClient
     ontologies  = []
     doc = Nokogiri::XML.parse(xml)
 
-    doc.xpath("//annotationBean").each do |ann|
+    doc.xpath(STATISTICS_BEANS_XPATH).each do |sb|
+      statistics[sb.xpath("mapping").text] = sb.xpath("nbAnnotation").text.to_i
+    end
+  
+    doc.xpath(ANNOTATION_BEANS_XPATH).each do |ann|
       parsed = {
         :score           => ann.xpath("score").text.to_i,
         :id              => ann.xpath("concept/id").text.to_i,
@@ -144,7 +152,7 @@ class OBAClient
       annotations << parsed
     end
 
-    doc.xpath("//ontologyUsedBean").each do |ontology|
+    doc.xpath(ONTOLOGY_BEANS_XPATH).each do |ontology|
       parsed = {}
       parsed[:localOntologyId]   = ontology.xpath("localOntologyId").text.to_i
       parsed[:virtualOntologyId] = ontology.xpath("virtualOntologyId").text.to_i

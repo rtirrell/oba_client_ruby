@@ -67,7 +67,6 @@ class TestOBAClient < Test::Unit::TestCase
       assert parsed[:statistics].is_a?(Hash)
       assert parsed[:annotations].is_a?(Array)
       assert parsed[:ontologies].is_a?(Array)
-      p parsed[:annotations].first
     end
   end
 end

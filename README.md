@@ -1,6 +1,7 @@
 # oba-client
 
-* [RubyForge project](http://rubyforge.org/projects/oba-client)
+* http://rubyforge.org/projects/oba-client
+* [RubyForge project](http://rubyforge.org/projects/oba-client "RubyForge project")
 
 ## DESCRIPTION:
 
@@ -30,6 +31,10 @@ See [the Annotator documentation](http://www.bioontology.org/wiki/index.php/Anno
     #          :annotations => [Array of annotations of text],
     #          :ontologies  => [Array of ontologies used]}
     client2.execute("another text string, maybe longer this time.")
+    client2.execute("this is the second query for this client!")
+    
+    # Or, parse some file you've already got lying about (pass as a string).
+    parsed = OBAClient::parse("<?xml ... ")
 
 ## LICENSE:
  
