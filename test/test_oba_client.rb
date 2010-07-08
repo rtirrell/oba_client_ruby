@@ -2,9 +2,7 @@ require "test/unit"
 require "oba_client"
 
 TEST_TEXTS = [
-   "hello I am a monkeyfish with a benign neoplastic....\t\n\\n",
-  "zebrafish echo delta tango TURN <?xml MY VOLUME UP cancer of the thorax.",
-  "zebrafish DROP TABLE !!! TURN MY VOLUME UP cancer of the thorax.",
+  "Mexico,, Disease Thing \o\r\m\n\t\v\l\rzebrafish !!! cancer of the thorax.",
   %Q{LOROE aonuhaso unseu anoeuhs aeuhsaonuh asoneuhason uaosenuh aosenuhaose
   aoneuhasonuhaoenuh anoeuhasn euhasoneu haosneuhaosenuhaoesunahoeusnaoeuteeano
   aot tt t t t t t t tae \n!!@)$@(#)%@#!)@# asoeuaohsenutahoeusaheou
@@ -53,9 +51,7 @@ class TestOBAClient < Test::Unit::TestCase
         :parse_xml => true
       )
       parsed = ann.execute(text)
-      assert parsed[:statistics].is_a?(Array)
-      assert parsed[:annotations].is_a?(Array)
-      assert parsed[:ontologies].is_a?(Array)
+      assert (parsed[:ontologies].all? {|o| o[:localOntologyId] == 42812})
     end
   end
   

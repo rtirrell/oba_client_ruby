@@ -5,6 +5,7 @@
 ## DESCRIPTION:
 
 A client for accessing the NCBO's Open Biomedical Annotator service.
+See [the Annotator documentation](http://www.bioontology.org/wiki/index.php/Annotator_User_Guide "Documentation") for much more information
 
 ## FEATURES:
 

@@ -5,7 +5,7 @@ require "net/http"
 require "uri"
 
 class OBAClient
-  VERSION = "1.0.1"
+  VERSION = "1.0.3"
 
   # A high HTTP read timeout, as the service sometimes takes awhile to respond.
   DEFAULT_TIMEOUT = 30
@@ -124,8 +124,8 @@ class OBAClient
 
     doc.xpath("//ontologyUsedBean").each do |ontology|
       parsed = {}
-      parsed[:localOntologyId]   = ontology.xpath("localOntologyId").text
-      parsed[:virtualOntologyId] = ontology.xpath("virtualOntologyId").text
+      parsed[:localOntologyId]   = ontology.xpath("localOntologyId").text.to_i
+      parsed[:virtualOntologyId] = ontology.xpath("virtualOntologyId").text.to_i
       parsed[:name]              = ontology.xpath("name").text
       ontologies << parsed
     end
