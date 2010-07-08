@@ -1,6 +1,6 @@
 = oba_client
 
-* FIX (url)
+* http://rubyforge.org/oba-client
 
 == DESCRIPTION:
 
@@ -16,7 +16,7 @@ FIX (describe your package)
 
 == REQUIREMENTS:
 
-* FIX (list of requirements)
+* None
 
 == INSTALL:
 

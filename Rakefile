@@ -1,7 +1,7 @@
 require "rubygems"
 require "hoe"
 
-Hoe.spec "oba_client" do
+Hoe.spec "oba-client" do
   developer("Rob Tirrell", "rpt@stanford.edu")
 
   self.rubyforge_name = "oba-client"
