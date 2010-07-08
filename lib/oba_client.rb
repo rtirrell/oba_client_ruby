@@ -63,7 +63,7 @@ class OBAClient
     end
     
     if !@options.include?(:email)
-      puts "TIP: as a courtesy, consider including your email in the request." if !$DEBUG
+      puts "TIP: as a courtesy, consider including your email in the request."
     end
   end
 
