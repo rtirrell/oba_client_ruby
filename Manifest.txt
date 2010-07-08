@@ -3,5 +3,5 @@ History.md
 Manifest.txt
 README.md
 Rakefile
-lib/oba_client.rb
+lib/oba-client.rb
 test/test_oba_client.rb

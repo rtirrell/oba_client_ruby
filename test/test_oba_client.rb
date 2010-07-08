@@ -1,6 +1,5 @@
 require "test/unit"
-require "oba_client"
-require "pp"
+require "oba-client"
 
 TEST_TEXTS = [
   "Mexico,, Disease Thing \o\r\m\n\t\v\l\rzebrafish !!! cancer of the thorax. large intestine thorax",

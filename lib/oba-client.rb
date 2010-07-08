@@ -5,7 +5,7 @@ require "net/http"
 require "uri"
 
 class OBAClient
-  VERSION = "2.0.0"
+  VERSION = "2.0.1"
 
   # A high HTTP read timeout, as the service sometimes takes awhile to respond.
   DEFAULT_TIMEOUT = 30
@@ -117,8 +117,9 @@ class OBAClient
     end
   end
 
-  # Attributes for mapping concepts (annotation concepts add one, 
-  # @see ANNOTATION_CONCEPT_ATTRIBUTES.
+  # Attributes for mapping concepts (annotation concepts add one additional
+  # attribute.
+  # @see ANNOTATION_CONCEPT_ATTRIBUTES
   CONCEPT_ATTRIBUTES = {
     :id              => lambda {|c| c.xpath("id").text.to_i},
     :localConceptId  => lambda {|c| c.xpath("localConceptId").text},
@@ -149,7 +150,7 @@ class OBAClient
     :mappingType => lambda {|c| c.xpath("mappingType").text}
   )
 
-  #  # Toplevel attributes for annotation contexts.
+  #  Toplevel attributes for annotation contexts.
   ANNOTATION_CONTEXT_ATTRIBUTES = {
     :score   => lambda {|c| c.xpath("score").text.to_i},
     :concept => lambda {|c| parse_concept(c.xpath("concept").first)},
@@ -164,7 +165,7 @@ class OBAClient
     :to              => lambda {|c| c.xpath("to").text.to_i},
   }
 
-  #  # Toplevel attributes for mapping contexts.
+  # Toplevel attributes for mapping contexts.
   MAPPED_CONTEXT_ATTRIBUTES = CONTEXT_ATTRIBUTES.merge(
     :mappedConcept => lambda {|c| parse_concept(c.xpath("mappedConcept").first)}
   )
@@ -227,6 +228,7 @@ class OBAClient
   # @return [Hash<Symbol, Object>] A Hash representation of the XML, as
   #   described above.
   def self.parse(xml)
+    puts "WARNING: text is empty!" if (xml.gsub(/\n/, "") == "")
     doc = Nokogiri::XML.parse(xml)
 
     statistics = Hash[doc.xpath(STATISTICS_BEANS_XPATH).map do |sb|

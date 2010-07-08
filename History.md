@@ -1,4 +1,8 @@
-## 2.0.0 / 2010-07-08
+## 2.0.1 / 2010-07-08
+
+Rubyforge doesn't allow "_", so we have "oba-client", not "oba_client".
+
+# 2.0.0 / 2010-07-08
 
 * Parse XML entirely. See README for more information on the return value.
 

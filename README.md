@@ -46,33 +46,32 @@ See [the Annotator documentation](http://www.bioontology.org/wiki/index.php/Anno
       :synonyms        => ["body cell"],
       :definitions     => ["a cell", "some other definition"],
     	
-    	:semanticTypes => [
-    		{:id => 230820, :semanticType => "T043", :description => "desc"},
-    		"etc..."
-    	]
+      :semanticTypes => [
+        {:id => 230820, :semanticType => "T043", :description => "desc"},
+        "etc..."
+      ]
     	
-    	:context => {
-    		:contextName   => "MAPPING",
-    		:isDirect      => false,
-    		:from          => 10,
-    		:to            => 20,
-    		:mappedConcept => {
-    			"has" => "the same information as other annotations, minus score"
-    	  }
-    	}
+      :context => {
+        :contextName   => "MAPPING",
+        :isDirect      => false,
+        :from          => 10,
+        :to            => 20,
+        :mappedConcept => {
+          "has" => "the same information as other annotations, minus score"
+        }
+      }
     	
       :mappingType => "Automatic"
     }, "more annotations..."]
     	
     :ontologies => [{
-    	:localOntologyId   => 40404,
-    	:name	             => "Ontology Name",
-    	:virtualOntologyId => 1042
+      :localOntologyId   => 40404,
+      :name              => "Ontology Name",
+      :virtualOntologyId => 1042
     }, "more ontologies..."]
     	
     client2.execute("another text string, maybe longer this time.")
     client2.execute("this is the second query for this client!")
-    
     
     # Or, parse some file you've already got lying about (pass as a string).
     parsed = OBAClient::parse("<?xml version='1.0'>...</xml>")
