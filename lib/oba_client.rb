@@ -85,7 +85,7 @@ class OBAClient
       end
       @parse_xml ? self.class.parse(response.body) : response.body
     rescue Timeout::Error
-      puts "Request for #{text[0..10]} timed-out at #{@timeout} seconds."
+      puts "Request for #{text[0..10]}... timed-out at #{@timeout} seconds."
     end
   end
 
