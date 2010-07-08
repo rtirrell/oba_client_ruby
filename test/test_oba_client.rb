@@ -1,12 +1,13 @@
 require "test/unit"
 require "oba_client"
+require "pp"
 
 TEST_TEXTS = [
-  "Mexico,, Disease Thing \o\r\m\n\t\v\l\rzebrafish !!! cancer of the thorax.",
-  %Q{LOROE aonuhaso unseu anoeuhs aeuhsaonuh asoneuhason uaosenuh aosenuhaose
-  aoneuhasonuhaoenuh anoeuhasn euhasoneu haosneuhaosenuhaoesunahoeusnaoeuteeano
-  aot tt t t t t t t tae \n!!@)$@(#)%@#!)@# asoeuaohsenutahoeusaheou
-  }
+  "Mexico,, Disease Thing \o\r\m\n\t\v\l\rzebrafish !!! cancer of the thorax. large intestine thorax",
+#  %Q{LOROE aonuhaso unseu anoeuhs aeuhsaonuh asoneuhason uaosenuh aosenuhaose
+#  aoneuhasonuhaoenuh anoeuhasn euhasoneu haosneuhaosenuhaoesunahoeusnaoeuteeano
+#  aot tt t t t t t t tae \n!!@)$@(#)%@#!)@# asoeuaohsenutahoeusaheou
+#  }
 ]
 
 class TestOBAClient < Test::Unit::TestCase
@@ -69,4 +70,23 @@ class TestOBAClient < Test::Unit::TestCase
       assert parsed[:ontologies].is_a?(Array)
     end
   end
+  
+  def test_ontologies_pseudo_parameter
+    ann = OBAClient.new(:ontologies => [42812], :parse_xml => true)
+    TEST_TEXTS.each do |text|
+      parsed = ann.execute(text)
+      assert parsed[:ontologies].all? {|o| o[:localOntologyId] == 42812}
+    end
+  end
+  
+  def test_parse
+    parsed = OBAClient::parse("<?xml version='1.0'></xml>")
+  end
+  
+  def test_with_print
+    ann = OBAClient.new(:ontologies => [42838, 35686], :parse_xml => false)
+    ann = OBAClient.new(:ontologies => [42838, 35686], :parse_xml => true)
+  end
+    
+  
 end

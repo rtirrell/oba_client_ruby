@@ -5,7 +5,7 @@ require "net/http"
 require "uri"
 
 class OBAClient
-  VERSION = "1.2.0"
+  VERSION = "2.0.0"
 
   # A high HTTP read timeout, as the service sometimes takes awhile to respond.
   DEFAULT_TIMEOUT = 30
@@ -15,7 +15,7 @@ class OBAClient
 
   # The header for every request. There's no need to specify this per-instance.
   HEADER = {"Content-Type" => "application/x-www-form-urlencoded"}
-    
+
   # Parameters the annotator accepts. Any one not in this list (excluding
   # textToAnnotate) is not valid.
   ANNOTATOR_PARAMETERS = [
@@ -33,11 +33,11 @@ class OBAClient
     :scored,
     :semanticTypes,
     :stopWords,
-    :wholeWordOnly, 
+    :wholeWordOnly,
     :withDefaultStopWords,
     :withSynonyms,
   ]
-  
+
   STATISTICS_BEANS_XPATH = "/success/data/annotatorResultBean/statistics/statisticsBean"
   ANNOTATION_BEANS_XPATH = "/success/data/annotatorResultBean/annotations/annotationBean"
   ONTOLOGY_BEANS_XPATH =   "/success/data/annotatorResultBean/ontologies/ontologyUsedBean"
@@ -48,13 +48,24 @@ class OBAClient
   #   * [String] uri: the URI of the annotator service (default: {DEFAULT_URI}).
   #   * [Fixnum] timeout: the length of the read timeout (default: {DEFAULT_TIMEOUT}).
   #   * [Boolean] parse_xml: whether to parse the received text (default: false).
+  #   * [Array<String>] ontologies: a pseudo-parameter which will set both
+  #      ontologiesToExpand and ontologiesToKeepInResult.
   # @param [Hash<String, String>] options Parameters for the annotation.
   def initialize(options = {})
     @uri         = URI.parse(options.delete(:uri) || DEFAULT_URI)
     @timeout     = options.delete(:timeout)       || DEFAULT_TIMEOUT
     @parse_xml   = options.delete(:parse_xml)
-    
-    @options     = {}
+
+    if ontologies = options.delete(:ontologies)
+      [:ontologiesToExpand, :ontologiesToKeepInResult].each do |k|
+        if options.include?(k)
+          puts "WARNING: specified both :ontologies and #{k}, ignoring given value of #{k}."
+        end
+        options[k] = ontologies
+      end
+    end
+
+    @options = {}
     options.each do |k, v|
       if !ANNOTATOR_PARAMETERS.include?(k)
         puts "WARNING: #{k} is not a valid annotator parameter."
@@ -65,7 +76,7 @@ class OBAClient
         @options[k] = v
       end
     end
-    
+
     if !@options.include?(:email)
       puts "TIP: as a courtesy, consider including your email in the request."
     end
@@ -81,6 +92,7 @@ class OBAClient
     request.body = {:textToAnnotate => text}.merge(@options).map do |k, v|
       "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}"
     end.join("&")
+    puts request.body if $DEBUG
 
     begin
       response = Net::HTTP.new(@uri.host, @uri.port).start do |http|
@@ -92,7 +104,7 @@ class OBAClient
       puts "Request for #{text[0..10]}... timed-out at #{@timeout} seconds."
     end
   end
-  
+
   # Convert a string true/false or 1/0 value to boolean.
   # @param [String] value The value to convert.
   # @return [true, false]
@@ -105,7 +117,108 @@ class OBAClient
     end
   end
 
-  # Parse the raw XML, returning a Hash with three elements: statistics,
+  # Attributes for mapping concepts (annotation concepts add one, 
+  # @see ANNOTATION_CONCEPT_ATTRIBUTES.
+  CONCEPT_ATTRIBUTES = {
+    :id              => lambda {|c| c.xpath("id").text.to_i},
+    :localConceptId  => lambda {|c| c.xpath("localConceptId").text},
+    :localOntologyId => lambda {|c| c.xpath("localOntologyId").text.to_i},
+    :isTopLevel      => lambda {|c| to_b(c.xpath("isTopLevel").text)},
+    :fullId          => lambda {|c| c.xpath("fullId").text},
+    :preferredName   => lambda {|c| c.xpath("preferredName").text},
+
+    :synonyms        => lambda do |c| 
+      c.xpath("synonyms/synonym").map do |s|
+        s.xpath("string").text
+      end
+    end,
+
+    :semanticTypes   => lambda do |c| 
+      c.xpath("semanticTypes/semanticTypeBean").map do |s|
+        {
+          :id           => s.xpath("id").text.to_i,
+          :semanticType => s.xpath("semanticType").text,
+          :description  => s.xpath("description").text
+        }
+      end
+    end
+  }
+  
+  # Annotation concepts have the same attributes as mapping concepts, plus one.
+  ANNOTATION_CONCEPT_ATTRIBUTES = CONCEPT_ATTRIBUTES.merge(
+    :mappingType => lambda {|c| c.xpath("mappingType").text}
+  )
+
+  #  # Toplevel attributes for annotation contexts.
+  ANNOTATION_CONTEXT_ATTRIBUTES = {
+    :score   => lambda {|c| c.xpath("score").text.to_i},
+    :concept => lambda {|c| parse_concept(c.xpath("concept").first)},
+    :context => lambda {|c| parse_context(c.xpath("context").first)}
+  }
+
+  # Toplevel attributes for all other contexts.
+  CONTEXT_ATTRIBUTES = {
+    :contextName     => lambda {|c| c.xpath("contextName").text},
+    :isDirect        => lambda {|c| to_b(c.xpath("isDirect").text)},
+    :from            => lambda {|c| c.xpath("from").text.to_i},
+    :to              => lambda {|c| c.xpath("to").text.to_i},
+  }
+
+  #  # Toplevel attributes for mapping contexts.
+  MAPPED_CONTEXT_ATTRIBUTES = CONTEXT_ATTRIBUTES.merge(
+    :mappedConcept => lambda {|c| parse_concept(c.xpath("mappedConcept").first)}
+  )
+
+  # Toplevel attributes for mgrep contexts.
+  MGREP_CONTEXT_ATTRIBUTES = CONTEXT_ATTRIBUTES.merge(
+    :name           => lambda {|c| c.xpath("term/name").text},
+    :localConceptId => lambda {|c| c.xpath("term/localConceptId").text},
+    :isPreferred    => lambda {|c| to_b(c.xpath("term/isPreferred").text)},
+    :dictionaryId   => lambda {|c| c.xpath("term/dictionaryId").text}
+  )
+
+  CONCEPT_TYPES = {
+    "concept"       => ANNOTATION_CONCEPT_ATTRIBUTES,
+    "mappedConcept" => CONCEPT_ATTRIBUTES
+  }
+
+  CONTEXT_CLASSES = {
+    "annotationContextBean"  => ANNOTATION_CONTEXT_ATTRIBUTES,
+    "mgrepContextBean"       => MGREP_CONTEXT_ATTRIBUTES,
+    "mappingContextBean"     => MAPPED_CONTEXT_ATTRIBUTES,
+  }
+
+  ##
+  # Parse a context - an annotation, or a mapping/mgrep context bean.
+  # @param [Nokgiri::XML::Node] context The root node of the context.
+  # @return Hash<Symbol, Object> The parsed context.
+  def self.parse_context(context)
+    # Annotations (annotationBeans) do not have a class, so we'll refer to them
+    # as annotationContextBeans
+    context_class = if context.attribute("class").nil?
+      "annotationContextBean"
+    else
+      context.attribute("class").value
+    end
+
+    Hash[CONTEXT_CLASSES[context_class].map do |k, v|
+      [k, v.call(context)]
+    end]
+  end
+
+  ##
+  # Parse a concept - a toplevel annotation concept, or an annotation's
+  # mapping concept.
+  # @param [Nokogiri::XML::Node] concept The root node of the concept.
+  # @return [Hash<Symbol, Object>] The parsed concept.
+  def self.parse_concept(concept)
+    Hash[CONCEPT_TYPES[concept.name].map do |k, v| 
+      [k, v.call(concept)]
+    end]
+  end
+
+  ##
+  # Parse raw XML, returning a Hash with three elements: statistics,
   # annotations, and ontologies. Respectively, these represent the annotation
   # statistics (annotations by mapping type, etc., as a Hash), an Array of
   # each annotation (as a Hash), and an Array of ontologies used (also as
@@ -114,50 +227,22 @@ class OBAClient
   # @return [Hash<Symbol, Object>] A Hash representation of the XML, as
   #   described above.
   def self.parse(xml)
-    statistics  = {}
-    annotations = []
-    ontologies  = []
     doc = Nokogiri::XML.parse(xml)
 
-    doc.xpath(STATISTICS_BEANS_XPATH).each do |sb|
-      statistics[sb.xpath("mapping").text] = sb.xpath("nbAnnotation").text.to_i
+    statistics = Hash[doc.xpath(STATISTICS_BEANS_XPATH).map do |sb|
+      [sb.xpath("mapping").text, sb.xpath("nbAnnotation").text.to_i]
+    end]
+
+    annotations = doc.xpath(ANNOTATION_BEANS_XPATH).map do |annotation|
+      parse_context(annotation)
     end
-  
-    doc.xpath(ANNOTATION_BEANS_XPATH).each do |ann|
-      parsed = {
-        :score           => ann.xpath("score").text.to_i,
-        :id              => ann.xpath("concept/id").text.to_i,
-        :localConceptId  => ann.xpath("concept/localConceptId").text,
-        :localOntologyId => ann.xpath("concept/localOntologyId").text.to_i,
-        :isTopLevel      => to_b(ann.xpath("concept/isTopLevel").text),
-        :fullId          => ann.xpath("concept/fullId").text,
-        :preferredName   => ann.xpath("concept/preferredName").text,
-        :mappingType     => ann.xpath("context/contextName").text,
-        :isDirect        => to_b(ann.xpath("context/isDirect").text)
+
+    ontologies = doc.xpath(ONTOLOGY_BEANS_XPATH).map do |ontology|
+      {
+        :localOntologyId   => ontology.xpath("localOntologyId").text.to_i,
+        :virtualOntologyId => ontology.xpath("virtualOntologyId").text.to_i,
+        :name              => ontology.xpath("name").text
       }
-
-      synonyms = ann.xpath("concept/synonyms/synonym")
-      parsed[:synonyms] = synonyms.map do |synonym|
-        synonym.xpath("string").text
-      end
-
-      semanticTypeBeans = ann.xpath("concept/semanticTypes/semanticTypeBean")
-      parsed[:semanticTypes] = semanticTypeBeans.map do |semanticType|
-        {
-          :id           => semanticType.xpath("id").text.to_i,
-          :semanticType => semanticType.xpath("semanticType").text,
-          :description  => semanticType.xpath("description").text
-        }
-      end
-      annotations << parsed
-    end
-
-    doc.xpath(ONTOLOGY_BEANS_XPATH).each do |ontology|
-      parsed = {}
-      parsed[:localOntologyId]   = ontology.xpath("localOntologyId").text.to_i
-      parsed[:virtualOntologyId] = ontology.xpath("virtualOntologyId").text.to_i
-      parsed[:name]              = ontology.xpath("name").text
-      ontologies << parsed
     end
 
     {

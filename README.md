@@ -1,12 +1,11 @@
 # oba-client
 
-* http://rubyforge.org/projects/oba-client
 * [RubyForge project](http://rubyforge.org/projects/oba-client "RubyForge project")
 
 ## DESCRIPTION:
 
 A client for accessing the NCBO's Open Biomedical Annotator service.
-See [the Annotator documentation](http://www.bioontology.org/wiki/index.php/Annotator_User_Guide "Documentation") for much more information
+See [the Annotator documentation](http://www.bioontology.org/wiki/index.php/Annotator_User_Guide "Documentation") for much more information.
 
 ## FEATURES:
 
@@ -23,18 +22,60 @@ See [the Annotator documentation](http://www.bioontology.org/wiki/index.php/Anno
 
 ## USAGE:
     
+    require "rubygems"
+    require "oba-client"
+    
     client = OBAClient.new
-    result = client.execute("some text string") # As XML.
+    # As XML.
+    result = client.execute("some text string") 
 
     client2 = OBAClient.new({:parse_xml => true})
     # Returns {:statistics  => {information about the annotation},
     #          :annotations => [Array of annotations of text],
     #          :ontologies  => [Array of ontologies used]}
+    # Like:
+    :statistics => {"MAPPING" => 1951, "MGREP" => 2319, "ISA_CLOSURE" => 30}
+    :annotations => [{
+      :score           => 199,
+      :id              => 203820,
+      :localConceptId  => "42877/CARO:0000013",
+      :localOntologyId => 42877,
+      :isTopLevel      => true,
+      :fullId          => "http://purl.obolibrary.org/obo/FBbt_00007002",
+      :preferredName   => "cell",
+      :synonyms        => ["body cell"],
+      :definitions     => ["a cell", "some other definition"],
+    	
+    	:semanticTypes => [
+    		{:id => 230820, :semanticType => "T043", :description => "desc"},
+    		"etc..."
+    	]
+    	
+    	:context => {
+    		:contextName   => "MAPPING",
+    		:isDirect      => false,
+    		:from          => 10,
+    		:to            => 20,
+    		:mappedConcept => {
+    			"has" => "the same information as other annotations, minus score"
+    	  }
+    	}
+    	
+      :mappingType => "Automatic"
+    }, "more annotations..."]
+    	
+    :ontologies => [{
+    	:localOntologyId   => 40404,
+    	:name	             => "Ontology Name",
+    	:virtualOntologyId => 1042
+    }, "more ontologies..."]
+    	
     client2.execute("another text string, maybe longer this time.")
     client2.execute("this is the second query for this client!")
     
+    
     # Or, parse some file you've already got lying about (pass as a string).
-    parsed = OBAClient::parse("<?xml ... ")
+    parsed = OBAClient::parse("<?xml version='1.0'>...</xml>")
 
 ## LICENSE:
  
