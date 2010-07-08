@@ -19,16 +19,23 @@ class OBAClient
   # Parameters the annotator accepts. Any one not in this list (excluding
   # textToAnnotate) is not valid.
   ANNOTATOR_PARAMETERS = [
-    :wholeWordOnly, 
-    :scored,
+    :email,
+    :filterNumber,
+    :format,
+    :isStopWordsCaseSensitive,
+    :isVirtualOntologyID,
+    :levelMax,
+    :longestOnly,
     :ontologiesToExpand,
     :ontologiesToKeepInResult,
-    :semanticTypes,
-    :withDefaultStopWords,
-    :format,
-    :levelMax,
     :mappingTypes,
-    :email
+    :minTermSize,
+    :scored,
+    :semanticTypes,
+    :stopWords,
+    :wholeWordOnly, 
+    :withDefaultStopWords,
+    :withSynonyms,
   ]
 
   # Instantiate the class with a set of reused options. Options used by the
