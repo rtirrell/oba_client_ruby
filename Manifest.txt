@@ -1,0 +1,8 @@
+.autotest
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/oba_client
+lib/oba_client.rb
+test/test_oba_client.rb
