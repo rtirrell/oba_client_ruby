@@ -5,7 +5,7 @@ require "net/http"
 require "uri"
 
 class OBAClient
-  VERSION = "1.0.0"
+  VERSION = "1.0.1"
 
   # A high HTTP read timeout, as the service sometimes takes awhile to respond.
   DEFAULT_TIMEOUT = 30
@@ -18,27 +18,29 @@ class OBAClient
     
   # Parameters the annotator accepts. Any one not in this list (excluding
   # textToAnnotate) is not valid.
-  ANNOTATOR_PARAMETERS = %w{
-    wholeWordOnly
-    scored
-    ontologiesToExpand
-    ontologiesToKeepInResult
-    semanticTypes
-    withDefaultStopWords
-    format
-    levelMax
-    mappingTypes
-    email
-  }
+  ANNOTATOR_PARAMETERS = [
+    :wholeWordOnly, 
+    :scored,
+    :ontologiesToExpand,
+    :ontologiesToKeepInResult,
+    :semanticTypes,
+    :withDefaultStopWords,
+    :format,
+    :levelMax,
+    :mappingTypes,
+    :email
+  ]
 
-  # Annotate a blob of text. Method options are:
-  # - [String] uri: the URI of the annotator service (default: {DEFAULT_URI}).
-  # - [Fixnum] timeout: the length of the read timeout (default: {DEFAULT_TIMEOUT}).
-  # - [Boolean] parse_xml: whether to parse the received text (default: false).
+  # Instantiate the class with a set of reused options. Options used by the
+  # method are:
+  #
+  #   * [String] uri: the URI of the annotator service (default: {DEFAULT_URI}).
+  #   * [Fixnum] timeout: the length of the read timeout (default: {DEFAULT_TIMEOUT}).
+  #   * [Boolean] parse_xml: whether to parse the received text (default: false).
   # @param [Hash<String, String>] options Parameters for the annotation.
   def initialize(options = {})
     @uri         = URI.parse(options.delete(:uri) || DEFAULT_URI)
-    @timeout     = options.delete(:timeout) || DEFAULT_TIMEOUT
+    @timeout     = options.delete(:timeout)       || DEFAULT_TIMEOUT
     @parse_xml   = options.delete(:parse_xml)
     
     @options     = {}
@@ -54,7 +56,7 @@ class OBAClient
     end
     
     if !@options.include?(:email)
-      puts "TIP: as a courtesy, consider including your email in the request."
+      puts "TIP: as a courtesy, consider including your email in the request." if !$DEBUG
     end
   end
 
@@ -81,10 +83,10 @@ class OBAClient
   end
 
   # Parse the raw XML, returning a Hash with three elements: statistics,
-  #   annotations, and ontologies. Respectively, these represent the annotation
-  #   statistics (annotations by mapping type, etc., as a Hash), an Array of
-  #   each annotation (as a Hash), and an Array of ontologies used (also as
-  #   a Hash).
+  # annotations, and ontologies. Respectively, these represent the annotation
+  # statistics (annotations by mapping type, etc., as a Hash), an Array of
+  # each annotation (as a Hash), and an Array of ontologies used (also as
+  # a Hash).
   # @param [String] xml The XMl we'll be parsing.
   # @return [Hash<Symbol, Object>] A Hash representation of the XML, as
   #   described above.

@@ -4,3 +4,6 @@
 
   * Does not yet parse statistics.
 
+=== 1.0.1 / 2010-07-07
+
+* Oops, fix a symbol bug.

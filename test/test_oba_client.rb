@@ -12,8 +12,16 @@ TEST_TEXTS = [
 ]
 
 class TestOBAClient < Test::Unit::TestCase
-  def test_reuse_annotator_instance
+  def test_reuse_instance
     ann = OBAClient.new
+    TEST_TEXTS.each do |text|
+      xml = ann.execute(text)
+      assert xml[0..4] == "<?xml"
+    end
+  end
+  
+  def test_reuse_instance_with_email
+    ann = OBAClient.new :email => "r.tirrell@gmail.com"
     TEST_TEXTS.each do |text|
       xml = ann.execute(text)
       assert xml[0..4] == "<?xml"
