@@ -13,3 +13,7 @@
 === 1.0.3 / 2010-07-07
 
 * Add more tests.
+
+=== 1.0.4 / 2010-07-08
+
+* Add all possible parameter values for the Annotator.

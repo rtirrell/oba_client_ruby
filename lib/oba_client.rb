@@ -5,7 +5,7 @@ require "net/http"
 require "uri"
 
 class OBAClient
-  VERSION = "1.0.3"
+  VERSION = "1.0.4"
 
   # A high HTTP read timeout, as the service sometimes takes awhile to respond.
   DEFAULT_TIMEOUT = 30
