@@ -18,3 +18,11 @@
 ## 1.0.4 / 2010-07-08
 
 * Add all possible parameter values for the Annotator.
+
+## 1.0.5 / 2010-07-08
+
+* Modify docs slightly.
+
+## 1.1.0 / 2010-07-08
+
+* Fully parse MGREP mappings.

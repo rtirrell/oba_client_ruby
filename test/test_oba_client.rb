@@ -38,7 +38,7 @@ class TestOBAClient < Test::Unit::TestCase
     TEST_TEXTS.each do |text|
       ann = OBAClient.new :parse_xml => true
       parsed = ann.execute(text)
-      assert parsed[:statistics].is_a?(Array)
+      assert parsed[:statistics].is_a?(Hash)
       assert parsed[:annotations].is_a?(Array)
       assert parsed[:ontologies].is_a?(Array)
     end
@@ -51,7 +51,7 @@ class TestOBAClient < Test::Unit::TestCase
         :parse_xml => true
       )
       parsed = ann.execute(text)
-      assert (parsed[:ontologies].all? {|o| o[:localOntologyId] == 42812})
+      assert parsed[:ontologies].all? {|o| o[:localOntologyId] == 42812}
     end
   end
   
@@ -64,9 +64,10 @@ class TestOBAClient < Test::Unit::TestCase
         :hoho                     => ["merry", "christmas"]
       )
       parsed = ann.execute(text)
-      assert parsed[:statistics].is_a?(Array)
+      assert parsed[:statistics].is_a?(Hash)
       assert parsed[:annotations].is_a?(Array)
       assert parsed[:ontologies].is_a?(Array)
+      p parsed[:annotations].first
     end
   end
 end

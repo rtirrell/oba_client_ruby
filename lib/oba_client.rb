@@ -5,7 +5,7 @@ require "net/http"
 require "uri"
 
 class OBAClient
-  VERSION = "1.0.4"
+  VERSION = "1.1.0"
 
   # A high HTTP read timeout, as the service sometimes takes awhile to respond.
   DEFAULT_TIMEOUT = 30
@@ -88,6 +88,18 @@ class OBAClient
       puts "Request for #{text[0..10]}... timed-out at #{@timeout} seconds."
     end
   end
+  
+  # Convert a string true/false or 1/0 value to boolean.
+  # @param [String] value The value to convert.
+  # @return [true, false]
+  def self.to_b(value)
+    case value
+    when "0"     then false
+    when "1"     then true
+    when "false" then false
+    when "true"  then true
+    end
+  end
 
   # Parse the raw XML, returning a Hash with three elements: statistics,
   # annotations, and ontologies. Respectively, these represent the annotation
@@ -98,20 +110,23 @@ class OBAClient
   # @return [Hash<Symbol, Object>] A Hash representation of the XML, as
   #   described above.
   def self.parse(xml)
-    statistics  = []
+    statistics  = {}
     annotations = []
     ontologies  = []
     doc = Nokogiri::XML.parse(xml)
 
     doc.xpath("//annotationBean").each do |ann|
-      parsed = {}
-      parsed[:score]           = ann.xpath("score").text.to_i
-      parsed[:id]              = ann.xpath("concept/id").text.to_i
-      parsed[:localConceptId]  = ann.xpath("concept/localConceptId")
-      parsed[:localOntologyId] = ann.xpath("concept/localOntologyId").text.to_i
-      parsed[:isTopLevel]      = ann.xpath("concept/isTopLevel").text.to_i
-      parsed[:fullId]          = ann.xpath("concept/fullId").text
-      parsed[:preferredName]   = ann.xpath("concept/preferredName").text
+      parsed = {
+        :score           => ann.xpath("score").text.to_i,
+        :id              => ann.xpath("concept/id").text.to_i,
+        :localConceptId  => ann.xpath("concept/localConceptId").text,
+        :localOntologyId => ann.xpath("concept/localOntologyId").text.to_i,
+        :isTopLevel      => to_b(ann.xpath("concept/isTopLevel").text),
+        :fullId          => ann.xpath("concept/fullId").text,
+        :preferredName   => ann.xpath("concept/preferredName").text,
+        :mappingType     => ann.xpath("context/contextName").text,
+        :isDirect        => to_b(ann.xpath("context/isDirect").text)
+      }
 
       synonyms = ann.xpath("concept/synonyms/synonym")
       parsed[:synonyms] = synonyms.map do |synonym|
