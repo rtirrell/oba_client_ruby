@@ -1,3 +1,6 @@
+## 2.0.2 / 2010-07-08
+Parse version and nbAnnotation for ontologies.
+
 ## 2.0.1 / 2010-07-08
 
 Rubyforge doesn't allow "_", so we have "oba-client", not "oba_client".

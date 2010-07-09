@@ -67,7 +67,10 @@ See [the Annotator documentation](http://www.bioontology.org/wiki/index.php/Anno
     :ontologies => [{
       :localOntologyId   => 40404,
       :name              => "Ontology Name",
-      :virtualOntologyId => 1042
+      :virtualOntologyId => 1042,
+      :version           => 1.1,
+      :nbAnnotation      => 40
+
     }, "more ontologies..."]
     	
     client2.execute("another text string, maybe longer this time.")

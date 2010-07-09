@@ -4,18 +4,26 @@ require "cgi"
 require "net/http"
 require "uri"
 
+##
+# A class for interacting with the Open Biomedical Annotator. There are two
+# things we do: get text, and parse it. We can do both independently or 
+# serially.
 class OBAClient
-  VERSION = "2.0.1"
+  VERSION = "2.0.2"
 
+  ##
   # A high HTTP read timeout, as the service sometimes takes awhile to respond.
   DEFAULT_TIMEOUT = 30
 
+  ##
   # The endpoint URI for the production version of the Annotator service.
   DEFAULT_URI = "http://rest.bioontology.org/obs/annotator"
 
+  ##
   # The header for every request. There's no need to specify this per-instance.
   HEADER = {"Content-Type" => "application/x-www-form-urlencoded"}
 
+  ##
   # Parameters the annotator accepts. Any one not in this list (excluding
   # textToAnnotate) is not valid.
   ANNOTATOR_PARAMETERS = [
@@ -38,10 +46,7 @@ class OBAClient
     :withSynonyms,
   ]
 
-  STATISTICS_BEANS_XPATH = "/success/data/annotatorResultBean/statistics/statisticsBean"
-  ANNOTATION_BEANS_XPATH = "/success/data/annotatorResultBean/annotations/annotationBean"
-  ONTOLOGY_BEANS_XPATH =   "/success/data/annotatorResultBean/ontologies/ontologyUsedBean"
-
+  ##
   # Instantiate the class with a set of reused options. Options used by the
   # method are:
   #
@@ -59,7 +64,7 @@ class OBAClient
     if ontologies = options.delete(:ontologies)
       [:ontologiesToExpand, :ontologiesToKeepInResult].each do |k|
         if options.include?(k)
-          puts "WARNING: specified both :ontologies and #{k}, ignoring given value of #{k}."
+          puts "WARNING: specified both :ontologies and #{k}, ignoring #{k}."
         end
         options[k] = ontologies
       end
@@ -78,10 +83,11 @@ class OBAClient
     end
 
     if !@options.include?(:email)
-      puts "TIP: as a courtesy, consider including your email in the request."
+      puts "TIP: as a courtesy, consider including your email in the request (:email => 'a@b.com')"
     end
   end
 
+  ##
   # Perform the annotation.
   # @param [String] text The text to annotate.
   # @return [Hash<Symbol, Array>, String, nil] A Hash representing the parsed
@@ -105,21 +111,14 @@ class OBAClient
     end
   end
 
-  # Convert a string true/false or 1/0 value to boolean.
-  # @param [String] value The value to convert.
-  # @return [true, false]
-  def self.to_b(value)
-    case value
-    when "0"     then false
-    when "1"     then true
-    when "false" then false
-    when "true"  then true
-    end
-  end
+  
+  STATISTICS_BEANS_XPATH = "/success/data/annotatorResultBean/statistics/statisticsBean"
+  ANNOTATION_BEANS_XPATH = "/success/data/annotatorResultBean/annotations/annotationBean"
+  ONTOLOGY_BEANS_XPATH   = "/success/data/annotatorResultBean/ontologies/ontologyUsedBean"
 
+  ##
   # Attributes for mapping concepts (annotation concepts add one additional
-  # attribute.
-  # @see ANNOTATION_CONCEPT_ATTRIBUTES
+  # attribute. See also {ANNOTATION_CONCEPT_ATTRIBUTES}.
   CONCEPT_ATTRIBUTES = {
     :id              => lambda {|c| c.xpath("id").text.to_i},
     :localConceptId  => lambda {|c| c.xpath("localConceptId").text},
@@ -145,11 +144,18 @@ class OBAClient
     end
   }
   
-  # Annotation concepts have the same attributes as mapping concepts, plus one.
-  ANNOTATION_CONCEPT_ATTRIBUTES = CONCEPT_ATTRIBUTES.merge(
-    :mappingType => lambda {|c| c.xpath("mappingType").text}
-  )
 
+  ##
+  # Toplevel attributes for mapping and mgrep contexts (both will add 
+  # additional attributes).
+  CONTEXT_ATTRIBUTES = {
+    :contextName     => lambda {|c| c.xpath("contextName").text},
+    :isDirect        => lambda {|c| to_b(c.xpath("isDirect").text)},
+    :from            => lambda {|c| c.xpath("from").text.to_i},
+    :to              => lambda {|c| c.xpath("to").text.to_i},
+  }
+  
+  ##
   #  Toplevel attributes for annotation contexts.
   ANNOTATION_CONTEXT_ATTRIBUTES = {
     :score   => lambda {|c| c.xpath("score").text.to_i},
@@ -157,19 +163,14 @@ class OBAClient
     :context => lambda {|c| parse_context(c.xpath("context").first)}
   }
 
-  # Toplevel attributes for all other contexts.
-  CONTEXT_ATTRIBUTES = {
-    :contextName     => lambda {|c| c.xpath("contextName").text},
-    :isDirect        => lambda {|c| to_b(c.xpath("isDirect").text)},
-    :from            => lambda {|c| c.xpath("from").text.to_i},
-    :to              => lambda {|c| c.xpath("to").text.to_i},
-  }
-
+  ##
   # Toplevel attributes for mapping contexts.
   MAPPED_CONTEXT_ATTRIBUTES = CONTEXT_ATTRIBUTES.merge(
+    :mappingType => lambda {|c| c.xpath("mappingType").text},
     :mappedConcept => lambda {|c| parse_concept(c.xpath("mappedConcept").first)}
   )
 
+  ##
   # Toplevel attributes for mgrep contexts.
   MGREP_CONTEXT_ATTRIBUTES = CONTEXT_ATTRIBUTES.merge(
     :name           => lambda {|c| c.xpath("term/name").text},
@@ -177,11 +178,6 @@ class OBAClient
     :isPreferred    => lambda {|c| to_b(c.xpath("term/isPreferred").text)},
     :dictionaryId   => lambda {|c| c.xpath("term/dictionaryId").text}
   )
-
-  CONCEPT_TYPES = {
-    "concept"       => ANNOTATION_CONCEPT_ATTRIBUTES,
-    "mappedConcept" => CONCEPT_ATTRIBUTES
-  }
 
   CONTEXT_CLASSES = {
     "annotationContextBean"  => ANNOTATION_CONTEXT_ATTRIBUTES,
@@ -195,7 +191,8 @@ class OBAClient
   # @return Hash<Symbol, Object> The parsed context.
   def self.parse_context(context)
     # Annotations (annotationBeans) do not have a class, so we'll refer to them
-    # as annotationContextBeans
+    # as annotationContextBeans. context_class will be one of the types in
+    # {CONTEXT_CLASSES}.
     context_class = if context.attribute("class").nil?
       "annotationContextBean"
     else
@@ -213,7 +210,7 @@ class OBAClient
   # @param [Nokogiri::XML::Node] concept The root node of the concept.
   # @return [Hash<Symbol, Object>] The parsed concept.
   def self.parse_concept(concept)
-    Hash[CONCEPT_TYPES[concept.name].map do |k, v| 
+    Hash[CONCEPT_ATTRIBUTES.map do |k, v| 
       [k, v.call(concept)]
     end]
   end
@@ -243,7 +240,9 @@ class OBAClient
       {
         :localOntologyId   => ontology.xpath("localOntologyId").text.to_i,
         :virtualOntologyId => ontology.xpath("virtualOntologyId").text.to_i,
-        :name              => ontology.xpath("name").text
+        :name              => ontology.xpath("name").text,
+        :version           => ontology.xpath("version").text.to_f,
+        :nbAnnotation      => ontology.xpath("nbAnnotation").text.to_i
       }
     end
 
@@ -252,5 +251,19 @@ class OBAClient
       :annotations => annotations,
       :ontologies  => ontologies
     }
+  end
+  
+  ##
+  # A little helper: convert a string true/false or 1/0 value to boolean.
+  # AFAIK, there's no better way to do this.
+  # @param [String] value The value to convert.
+  # @return [true, false]
+  def self.to_b(value)
+    case value
+    when "0"     then false
+    when "1"     then true
+    when "false" then false
+    when "true"  then true
+    end
   end
 end
