@@ -3,10 +3,10 @@ require "oba-client"
 
 TEST_TEXTS = [
   "Mexico,, Disease Thing \o\r\m\n\t\v\l\rzebrafish !!! cancer of the thorax. large intestine thorax",
-#  %Q{LOROE aonuhaso unseu anoeuhs aeuhsaonuh asoneuhason uaosenuh aosenuhaose
-#  aoneuhasonuhaoenuh anoeuhasn euhasoneu haosneuhaosenuhaoesunahoeusnaoeuteeano
-#  aot tt t t t t t t tae \n!!@)$@(#)%@#!)@# asoeuaohsenutahoeusaheou
-#  }
+  %Q{LOROE aonuhaso unseu anoeuhs aeuhsaonuh asoneuhason uaosenuh aosenuhaose
+  aoneuhasonuhaoenuh anoeuhasn euhasoneu haosneuhaosenuhaoesunahoeusnaoeuteeano
+  aot tt t t t t t t tae \n!!@)$@(#)%@\#!)@# asoeuaohsenutahoeusaheou
+  }
 ]
 
 class TestOBAClient < Test::Unit::TestCase

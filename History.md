@@ -1,3 +1,6 @@
+## 2.0.3 / 2010-07-17
+Quick fix in docs.
+
 ## 2.0.2 / 2010-07-08
 Parse version and nbAnnotation for ontologies.
 

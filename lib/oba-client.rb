@@ -9,7 +9,7 @@ require "uri"
 # things we do: get text, and parse it. We can do both independently or 
 # serially.
 class OBAClient
-  VERSION = "2.0.2"
+  VERSION = "2.0.3"
 
   ##
   # A high HTTP read timeout, as the service sometimes takes awhile to respond.
@@ -50,10 +50,13 @@ class OBAClient
   # Instantiate the class with a set of reused options. Options used by the
   # method are:
   #
-  #   * [String] uri: the URI of the annotator service (default: {DEFAULT_URI}).
-  #   * [Fixnum] timeout: the length of the read timeout (default: {DEFAULT_TIMEOUT}).
-  #   * [Boolean] parse_xml: whether to parse the received text (default: false).
-  #   * [Array<String>] ontologies: a pseudo-parameter which will set both
+  #   * {String} **uri**: the URI of the annotator service (default: 
+  #     {DEFAULT_URI}).
+  #   * {Fixnum} **timeout**: the length of the read timeout (default: 
+  #     {DEFAULT_TIMEOUT}).
+  #   * {Boolean} **parse_xml**: whether to parse the received text (default: 
+  #     false).
+  #   * {Array}<{String}> **ontologies**: a pseudo-parameter which sets both
   #      ontologiesToExpand and ontologiesToKeepInResult.
   # @param [Hash<String, String>] options Parameters for the annotation.
   def initialize(options = {})
@@ -83,7 +86,8 @@ class OBAClient
     end
 
     if !@options.include?(:email)
-      puts "TIP: as a courtesy, consider including your email in the request (:email => 'a@b.com')"
+      puts "TIP: as a courtesy, consider including your email in the " + 
+           "request (:email => 'a@b.com')"
     end
   end
 
@@ -117,8 +121,7 @@ class OBAClient
   ONTOLOGY_BEANS_XPATH   = "/success/data/annotatorResultBean/ontologies/ontologyUsedBean"
 
   ##
-  # Attributes for mapping concepts (annotation concepts add one additional
-  # attribute. See also {ANNOTATION_CONCEPT_ATTRIBUTES}.
+  # Attributes for mapping concepts (only one type).
   CONCEPT_ATTRIBUTES = {
     :id              => lambda {|c| c.xpath("id").text.to_i},
     :localConceptId  => lambda {|c| c.xpath("localConceptId").text},
@@ -146,7 +149,7 @@ class OBAClient
   
 
   ##
-  # Toplevel attributes for mapping and mgrep contexts (both will add 
+  # Attributes for mapping and mgrep contexts (both will add 
   # additional attributes).
   CONTEXT_ATTRIBUTES = {
     :contextName     => lambda {|c| c.xpath("contextName").text},
@@ -156,7 +159,7 @@ class OBAClient
   }
   
   ##
-  #  Toplevel attributes for annotation contexts.
+  #  Attributes for annotation contexts.
   ANNOTATION_CONTEXT_ATTRIBUTES = {
     :score   => lambda {|c| c.xpath("score").text.to_i},
     :concept => lambda {|c| parse_concept(c.xpath("concept").first)},
@@ -164,14 +167,14 @@ class OBAClient
   }
 
   ##
-  # Toplevel attributes for mapping contexts.
+  # Attributes for mapping contexts.
   MAPPED_CONTEXT_ATTRIBUTES = CONTEXT_ATTRIBUTES.merge(
-    :mappingType => lambda {|c| c.xpath("mappingType").text},
+    :mappingType   => lambda {|c| c.xpath("mappingType").text},
     :mappedConcept => lambda {|c| parse_concept(c.xpath("mappedConcept").first)}
   )
 
   ##
-  # Toplevel attributes for mgrep contexts.
+  # Attributes for mgrep contexts.
   MGREP_CONTEXT_ATTRIBUTES = CONTEXT_ATTRIBUTES.merge(
     :name           => lambda {|c| c.xpath("term/name").text},
     :localConceptId => lambda {|c| c.xpath("term/localConceptId").text},
@@ -179,15 +182,19 @@ class OBAClient
     :dictionaryId   => lambda {|c| c.xpath("term/dictionaryId").text}
   )
 
+  ## 
+  # Map the bean type to the set of attributes we parse from it.
   CONTEXT_CLASSES = {
-    "annotationContextBean"  => ANNOTATION_CONTEXT_ATTRIBUTES,
-    "mgrepContextBean"       => MGREP_CONTEXT_ATTRIBUTES,
-    "mappingContextBean"     => MAPPED_CONTEXT_ATTRIBUTES,
+    "annotationContextBean" => ANNOTATION_CONTEXT_ATTRIBUTES,
+    "mgrepContextBean"      => MGREP_CONTEXT_ATTRIBUTES,
+    "mappingContextBean"    => MAPPED_CONTEXT_ATTRIBUTES,
   }
 
   ##
-  # Parse a context - an annotation, or a mapping/mgrep context bean.
+  # Parse a context: an annotation, or a mapping/mgrep context bean.
+  #
   # @param [Nokgiri::XML::Node] context The root node of the context.
+  #
   # @return Hash<Symbol, Object> The parsed context.
   def self.parse_context(context)
     # Annotations (annotationBeans) do not have a class, so we'll refer to them
@@ -205,9 +212,11 @@ class OBAClient
   end
 
   ##
-  # Parse a concept - a toplevel annotation concept, or an annotation's
+  # Parse a concept: a toplevel annotation concept, or an annotation's
   # mapping concept.
+  #
   # @param [Nokogiri::XML::Node] concept The root node of the concept.
+  #
   # @return [Hash<Symbol, Object>] The parsed concept.
   def self.parse_concept(concept)
     Hash[CONCEPT_ATTRIBUTES.map do |k, v| 
@@ -221,9 +230,11 @@ class OBAClient
   # statistics (annotations by mapping type, etc., as a Hash), an Array of
   # each annotation (as a Hash), and an Array of ontologies used (also as
   # a Hash).
-  # @param [String] xml The XMl we'll be parsing.
+  #
+  # @param [String] xml The XML we'll be parsing.
+  #
   # @return [Hash<Symbol, Object>] A Hash representation of the XML, as
-  #   described above.
+  #   described in the README.
   def self.parse(xml)
     puts "WARNING: text is empty!" if (xml.gsub(/\n/, "") == "")
     doc = Nokogiri::XML.parse(xml)
@@ -256,7 +267,9 @@ class OBAClient
   ##
   # A little helper: convert a string true/false or 1/0 value to boolean.
   # AFAIK, there's no better way to do this.
+  #
   # @param [String] value The value to convert.
+  #
   # @return [true, false]
   def self.to_b(value)
     case value
