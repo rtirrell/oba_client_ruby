@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{oba_client}
-  s.version = "2.0.3"
+  s.version = "2.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Rob Tirrell"]
@@ -18,11 +18,11 @@ Gem::Specification.new do |s|
   s.files = [
     ".gitignore",
      "History.md",
-     "Manifest.txt",
      "README.md",
      "Rakefile",
-     "Rakefile-2",
+     "VERSION",
      "lib/oba_client.rb",
+     "oba_client.gemspec",
      "test/test_oba_client.rb"
   ]
   s.homepage = %q{http://github.com/rtirrell/oba_client}
