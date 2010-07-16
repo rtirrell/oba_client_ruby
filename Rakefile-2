@@ -1,20 +1,3 @@
-require "rubygems"
-#require "hoe"
-
-#Hoe.plugin :yard
-
-#Hoe.spec "oba-client" do
-#  self.developer "Rob Tirrell", "rpt@stanford.edu"
-#  self.url             = "http://rubyforge.org/projects/oba-client"
-#    
-#  self.yard_title      = "OBAClient Documentation"
-#  self.yard_options    = ["--default-return", "void"]
-#  self.yard_markup     = "markdown"
-#  self.remote_yard_dir = ""
-#
-#  self.rubyforge_name = "oba-client"
-#end
-
 require 'rubygems'
 require 'rake'
 
@@ -25,7 +8,7 @@ begin
     gem.summary = %Q{TODO: one-line summary of your gem}
     gem.description = %Q{TODO: longer description of your gem}
     gem.email = "rpt@stanford.edu"
-    gem.homepage = "http://github.com/rtirrell/oba_client"
+    gem.homepage = "http://github.com/rtirrell/tes"
     gem.authors = ["Rob Tirrell"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
     gem.add_development_dependency "yard", ">= 0"
