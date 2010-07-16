@@ -1,7 +1,6 @@
-.autotest
 History.md
 Manifest.txt
 README.md
 Rakefile
-lib/oba-client.rb
+lib/oba_client.rb
 test/test_oba_client.rb

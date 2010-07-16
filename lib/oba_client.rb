@@ -195,7 +195,7 @@ class OBAClient
   #
   # @param [Nokgiri::XML::Node] context The root node of the context.
   #
-  # @return Hash<Symbol, Object> The parsed context.
+  # @return [Hash<Symbol, Object>] The parsed context.
   def self.parse_context(context)
     # Annotations (annotationBeans) do not have a class, so we'll refer to them
     # as annotationContextBeans. context_class will be one of the types in
