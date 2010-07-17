@@ -1,6 +1,6 @@
 # oba-client
 
-* http://rubyforge.org/projects/oba-client
+* [Github](github.com/rtirrell/oba_client)
 
 ## DESCRIPTION:
 
