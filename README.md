@@ -1,6 +1,6 @@
 # oba-client
 
-* [GitHub](github.com/rtirrell/oba_client)
+* [GitHub](github.com/rtirrell/oba_client_ruby)
 
 ## DESCRIPTION:
 
