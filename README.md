@@ -1,10 +1,10 @@
 # oba-client
 
-* [Github](github.com/rtirrell/oba_client)
+* [GitHub](github.com/rtirrell/oba_client)
 
 ## DESCRIPTION:
 
-A client for accessing the NCBO's Open Biomedical Annotator service.
+A client for accessing the NCBO's Open Biomedical Annotator web service.
 See [the Annotator documentation](http://www.bioontology.org/wiki/index.php/Annotator_User_Guide "Documentation") for much more information.
 
 ## FEATURES:
