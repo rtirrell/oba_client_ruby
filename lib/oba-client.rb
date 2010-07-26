@@ -9,7 +9,7 @@ require "uri"
 # things we do: get text, and parse it. We can do both independently or 
 # serially.
 class OBAClient
-  VERSION = "2.0.3"
+  VERSION = "2.0.4"
 
   ##
   # A high HTTP read timeout, as the service sometimes takes awhile to respond.

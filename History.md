@@ -1,3 +1,6 @@
+## 2.0.4 / 2010-07-17
+No notes were provided for this release.
+
 ## 2.0.3 / 2010-07-17
 Quick fix in docs.
 
