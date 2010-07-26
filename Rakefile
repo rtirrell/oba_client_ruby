@@ -1,5 +1,5 @@
 require "rubygems"
-require File.dirname(__FILE__) + "/lib/oba_client.rb"
+require File.dirname(__FILE__) + "/lib/oba-client.rb"
 #require "hoe"
 
 #Hoe.plugin :yard
@@ -22,11 +22,11 @@ require "rake"
 begin
   require "jeweler"
   Jeweler::Tasks.new do |gem|
-    gem.name = "oba_client"
+    gem.name = "oba-client"
     gem.summary = "A client for the Open Biomedical Annotator."
     gem.description = "See above."
     gem.email = "rpt@stanford.edu"
-    gem.homepage = "http://github.com/rtirrell/oba_client"
+    gem.homepage = "http://github.com/rtirrell/oba-client"
     gem.authors = ["Rob Tirrell"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
     gem.add_development_dependency "yard", ">= 0"
