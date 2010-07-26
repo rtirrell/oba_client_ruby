@@ -4,12 +4,12 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{oba_client}
+  s.name = %q{oba-client}
   s.version = "2.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Rob Tirrell"]
-  s.date = %q{2010-07-17}
+  s.date = %q{2010-07-26}
   s.description = %q{See above.}
   s.email = %q{rpt@stanford.edu}
   s.extra_rdoc_files = [
@@ -21,11 +21,11 @@ Gem::Specification.new do |s|
      "README.md",
      "Rakefile",
      "VERSION",
-     "lib/oba_client.rb",
-     "oba_client.gemspec",
+     "lib/oba-client.rb",
+     "oba-client.gemspec",
      "test/test_oba_client.rb"
   ]
-  s.homepage = %q{http://github.com/rtirrell/oba_client}
+  s.homepage = %q{http://github.com/rtirrell/oba-client}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
